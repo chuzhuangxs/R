@@ -49,6 +49,14 @@ ggplot(cabbage_exp,aes(x=Date,y=Weight,fill=Cultivar))+geom_bar(stat = "identity
 ggplot(cabbage_exp,aes(x=Date,y=Weight,fill=Cultivar))+geom_bar(stat = "identity")+guides(fill=guide_legend(reverse = TRUE))
 #调整条形的堆叠顺序
 ggplot(cabbage_exp,aes(x=Date,y=Weight,fill=Cultivar,order=desc(Cultivar)))+geom_bar(stat = "identity")
-#绘制百分比堆叠条形图
+#绘制百分比堆叠条形图,ddply函数中Date用于分组,执行transform函数
+ce<-ddply(cabbage_exp,"Date",transform,percent_weight=Weight/sum(Weight)*100)
+ce
+ggplot(ce,aes(x=Date,y=percent_weight,fill=Cultivar))+geom_bar(stat = "identity")
+#添加数据标签
+#在条形图顶端下方,geom_text函数添加数据标签vjust参数设置在图形顶端的上方还是下方
+ggplot(cabbage_exp,aes(x=interaction(Date,Cultivar),y=Weight))+geom_bar(stat = "identity")+geom_text(aes(label=Weight),vjust=1.5,colour="white")
+#在条形图顶端上方
+ggplot(cabbage_exp,aes(x=interaction(Date,Cultivar),y=Weight))+geom_bar(stat = "identity")+geom_text(aes(label=Weight),vjust=-0.2)
 
 
