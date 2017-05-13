@@ -53,10 +53,45 @@ ggplot(cabbage_exp,aes(x=Date,y=Weight,fill=Cultivar,order=desc(Cultivar)))+geom
 ce<-ddply(cabbage_exp,"Date",transform,percent_weight=Weight/sum(Weight)*100)
 ce
 ggplot(ce,aes(x=Date,y=percent_weight,fill=Cultivar))+geom_bar(stat = "identity")
-#添加数据标签
+#添加数据标签，interaction函数关联date与cultivar标签
 #在条形图顶端下方,geom_text函数添加数据标签vjust参数设置在图形顶端的上方还是下方
 ggplot(cabbage_exp,aes(x=interaction(Date,Cultivar),y=Weight))+geom_bar(stat = "identity")+geom_text(aes(label=Weight),vjust=1.5,colour="white")
 #在条形图顶端上方
 ggplot(cabbage_exp,aes(x=interaction(Date,Cultivar),y=Weight))+geom_bar(stat = "identity")+geom_text(aes(label=Weight),vjust=-0.2)
+#防止数据标签溢出绘图区域，将y轴上限变大
+ggplot(cabbage_exp,aes(x=interaction(Date,Cultivar),y=Weight))+geom_bar(stat = "identity")+geom_text(aes(label=Weight),vjust=-0.2)+ylim(0,max(cabbage_exp$Weight)*1.3)
+#根据日期与性别对数据进行合理排序
+ce<-arrange(cabbage_exp,Date,Cultivar)
+ce
+#计算Weight的累积和
+ce<-ddply(ce,"Date",transform,label_y=cumsum(Weight))
+ce
+ggplot(ce,aes(x=Date,y=Weight,fill=Cultivar))+geom_bar(stat = "identity")+geom_text(aes(y=label_y,label=Weight),vjust=1.5,colour="white")
+#绘制Cleveland点图
+tophit<-tophitters2001[1:25,]
+tophit
+ggplot(tophit,aes(x=gidp,y=name))+geom_point()
+#改为由gidp排序
+ggplot(tophit,aes(x=gidp,y=reorder(name,gidp)))+geom_point(size=3)+theme_bw()+theme(
+  panel.grid.major.x= element_blank(),
+  panel.grid.minor.x = element_blank(),
+  panel.grid.major.y = element_line(colour = "grey60",linetype = "dashed")
+)
+#根据其他变量对样本进行分组
+#order函数根据lg,gidp变量对name变量进行分组
+nameorder<-tophit$name[order(tophit$lg,tophit$gidp)]
+#将name转换为因子
+tophit$name<-factor(tophit$name,levels = nameorder)
+#geom_segment()函数将网格设为数据点为端点的直线
+ggplot(tophit,aes(x=gidp,y=name))+geom_segment(aes(yend=name),xend=0,colour="grey50")+
+  geom_point(size=3,aes(colour=lg))+
+  scale_color_brewer(palette = "Set1",limits=c("NL","AL"))+
+  theme_bw()+
+  theme(panel.grid.major.y = element_blank(),
+        legend.position = c(1,0.55),
+        legend.justification = c(1,0.5)
+        )
+
+
 
 
