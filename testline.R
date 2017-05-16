@@ -33,7 +33,18 @@ ggplot(tg,aes(x=dose,y=length,colour=supp))+geom_line()
 ggplot(tg,aes(x=dose,y=length,linetype=supp,colour=supp))+geom_line()
 #将x轴变为因子对象,group指定分组,group未指定时ggplot会以colour或者linetype映射的变量来分组
 ggplot(tg,aes(x=factor(dose),y=length,linetype=supp,colour=supp,group=supp))+geom_line()
-
+ggplot(tg,aes(x=dose,y=length,shape=supp))+geom_line()+geom_point(size=4)
+#移动数据点的位置，position参数
+ggplot(tg,aes(x=dose,y=length,shape=supp))+geom_line(position = position_dodge(0.2))+geom_point(position = position_dodge(0.2),size=4)
+#修改线条样式
+ggplot(BOD,aes(x=Time,y=demand))+geom_line(linetype="dashed",size=1,colour="blue")
+#使用调色板
+ggplot(tg,aes(x=dose,y=length,colour=supp))+geom_line()+scale_color_brewer(palette = "Set1")
+ggplot(tg,aes(x=dose,y=length,colour=supp))+geom_line()+scale_color_brewer(palette = "Set1")+geom_point(shape=22)
+#使用fill填充色
+ggplot(tg,aes(x=dose,y=length,colour=supp))+geom_line()+scale_color_brewer(palette = "Set1")+geom_point(shape=22,size=4,fill="blue")
+#使用另一个调色板,这个调色板对点调色
+ggplot(tg,aes(x=dose,y=length,fill=supp))+geom_line()+geom_point(shape=22,size=4)+scale_fill_manual(values = c("red","black"))
 
 
 
