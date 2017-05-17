@@ -45,6 +45,31 @@ ggplot(tg,aes(x=dose,y=length,colour=supp))+geom_line()+scale_color_brewer(palet
 ggplot(tg,aes(x=dose,y=length,colour=supp))+geom_line()+scale_color_brewer(palette = "Set1")+geom_point(shape=22,size=4,fill="blue")
 #使用另一个调色板,这个调色板对点调色
 ggplot(tg,aes(x=dose,y=length,fill=supp))+geom_line()+geom_point(shape=22,size=4)+scale_fill_manual(values = c("red","black"))
+#绘制面积图
+sunspotyear<-data.frame(
+  Year=as.numeric(time(sunspot.year)),
+  Sunspots=as.numeric(sunspot.year)
+  )
+ggplot(sunspotyear,aes(x=Year,y=Sunspots))+geom_area()
+ggplot(sunspotyear,aes(x=Year,y=Sunspots))+geom_area(colour="black",fill="blue",alpha=0.2)
+#直接添加边框线，系统会在起点和终点位置分别绘制一套垂直线
+ggplot(sunspotyear,aes(x=Year,y=Sunspots))+geom_area(fill="blue",alpha=0.2)+geom_line()
+#绘制堆积面积图
+ggplot(uspopage,aes(x=Year,y=Thousands,fill=AgeGroup))+geom_area()
+#翻转图例堆积顺序
+ggplot(uspopage,aes(x=Year,y=Thousands,fill=AgeGroup))+geom_area(colour="black",size=2,alpha=0.4)+scale_fill_brewer(palette = "Blues",breaks=rev(levels(uspopage$AgeGroup)))
+#反转面积图的堆积顺序
+ggplot(uspopage,aes(x=Year,y=Thousands,fill=AgeGroup,order=desc(AgeGroup)))+geom_area(colour="black",size=2,alpha=0.4)+scale_fill_brewer(palette = "Blues")
+#不绘制多边形
+ggplot(uspopage,aes(x=Year,y=Thousands,fill=AgeGroup,order=desc(AgeGroup)))+geom_area(colour=NA,alpha=0.4)+scale_fill_brewer(palette = "Blues")+geom_line(position = "stack",size=0.2)
+#绘制百分比堆积条形图
+uspopage_prob<-ddply(uspopage,"Year",transform,Percent=Thousands/sum(Thousands)*100)
+ggplot(uspopage_prob,aes(x=Year,y=Percent,fill=AgeGroup))+geom_area(colour=NA,alpha=0.4)+scale_fill_brewer(palette = "Blues")+geom_line(position = "stack",size=0.2)
+#添加置信域
+clim<-subset(climate,Source=="Berkeley",select = c("Year","Anomaly10y","Unc10y"))
+clim
+ggplot(clim,aes(x=Year,y=Anomaly10y))+geom_ribbon(aes(ymin=Anomaly10y-Unc10y,ymax=Anomaly10y+Unc10y),alpha=0.2)+geom_line()
+
 
 
 
