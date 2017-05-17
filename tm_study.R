@@ -12,7 +12,7 @@ reuters
 #用tm_map命令对语料库文件进行预处理，将其转为纯文本并去除多余空格，转换小写，去除常用词汇、合并异形同意词汇
 #网上的代码大多写as.PlainTextDocument,这是错误的写法
 #reuters<-tm_map(reuters,PlainTextDocument) #转换为纯文本 #这里不用转换为纯文本
-reuters<-tm_map(reuters,stripWhitespace) #去除多余空白
+reuters<-tm_map (reuters,stripWhitespace)#去除多余空白
 reuters<-tm_map(reuters,content_transformer(tolower))#转换小写 新版本的TM包使你不能操作简单字符值，要用content_transformer函数包裹
 
 reuters<-tm_map(reuters,removeWords,stopwords("english"))#去掉停止词
