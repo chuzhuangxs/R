@@ -94,8 +94,71 @@ predictvals<-function(model,xvar,yvar,xrange=NULL,samples=100,...){
     else if(any(class(model)%in%"loess"))
       xrange<-range(model$x)
   }
-  newdata<-data.frame(x=seq(xrange(1)))
+  newdata<-data.frame(x=seq(xrange[1],xrange[2],length.out = samples))
+  names(newdata)<-xvar
+  newdata[[yvar]]<-predict(model,newdata=newdata,...)
+  newdata
 }
+#使用上面编写的函数测试
+modlinear<-lm(heightIn~ageYear,heightweight)
+lm_predict<-predictvals(modlinear,"ageYear","heightIn")
+sp+geom_line(data = lm_predict,colour="red",size=8)
+#添加多个模型的拟合线dlply函数中sex是分类变量
+make_model<-function(data){
+  lm(heightIn~ageYear,data)
+}
+models<-dlply(heightweight,"sex",.fun = make_model)
+models
+#获取预测值,dlply与ldply函数的作用都是切分数据
+predvals<-ldply(models,.fun = predictvals,xvar = "ageYear",yvar="heightIn")
+ggplot(heightweight,aes(x=ageYear,y=heightIn,colour=sex))+geom_point()+geom_line(data=predvals)
+#使两组预测值的x轴的范围相同,添加xrange参数
+predvals<-ldply(models,.fun = predictvals,xvar="ageYear",yvar="heightIn",xrange=range(heightweight$ageYear))
+ggplot(heightweight,aes(x=ageYear,y=heightIn,colour=sex))+geom_point()+geom_line(data=predvals)
+#向散点图添加系数模型
+model<-lm(heightIn~ageYear,heightweight)
+summary(model)
+pred<-predictvals(model,"ageYear","heightIn")
+sp<-ggplot(heightweight,aes(x=ageYear,y=heightIn))+geom_point()+geom_line(data=pred)
+#添加系数
+sp+annotate("text",label="r^2=0.42",parse=TRUE,x=16.5,y=52)
+#使用expression函数检测字符串（数学公式）是否可以作为系数输出
+expression(r^2==0.42)
+expression(r^2=0.42)
+#利用函数解析并返回一个公式
+eqn<-as.character(as.expression(
+  substitute(italic(y)==a+b*italic(x)*","~~italic(r)^2~"="~r2,
+             list(a=format(coef(model)[1],digits = 3),
+                  b=format(coef(model)[2],digits = 3),
+                  r2=format(summary(model)$r.squared,digits = 2)
+                  )
+             )
+))
+eqn
+parse(text=eqn)
+#添加到图形上,x=Inf,y=-Inf,hjust=1.1,vjust=-.5,这些参数调整公式的位置
+sp+annotate("text",label=eqn,parse=TRUE)
+sp+annotate("text",label=eqn,parse=TRUE,x=Inf,y=-Inf,hjust=1.1,vjust=-.5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
