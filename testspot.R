@@ -2,6 +2,7 @@ library(ggplot2)
 library(gcookbook)
 library(plyr)
 library(MASS)
+library(reshape2)
 
 #绘制散点图
 ggplot(heightweight,aes(x=ageYear,y=heightIn))+geom_point()
@@ -139,9 +140,82 @@ parse(text=eqn)
 #添加到图形上,x=Inf,y=-Inf,hjust=1.1,vjust=-.5,这些参数调整公式的位置
 sp+annotate("text",label=eqn,parse=TRUE)
 sp+annotate("text",label=eqn,parse=TRUE,x=Inf,y=-Inf,hjust=1.1,vjust=-.5)
+#向散点图添加边际地毯
+ggplot(faithful,aes(x=eruptions,y=waiting))+geom_point()+geom_rug()
+#添加扰动并设定size减少数据重叠
+ggplot(faithful,aes(x=eruptions,y=waiting))+geom_point()+geom_rug(position = "jitter",size=0.2)
+#向散点图添加标签
+subset(countries,Year==2009&healthexp>2000)
+sp<-ggplot(subset(countries,Year==2009&healthexp>2000),aes(x=healthexp,y=infmortality))+geom_point()
+sp
+sp+annotate("text",x=4350,y=5.4,label="Canada")+annotate("text",x=7400,y=6.8,label="USA")
+#设置自动添加标签
+sp+geom_text(aes(label=Name),size=4)
+#做一些调整
+sp+geom_text(aes(label=Name),size=4,vjust=-1)
+#设置左对齐或者右对齐，最好不要改变hjust的值,去改变x的值比较好
+sp+geom_text(aes(label=Name),size=4,hjust=0)
+sp+geom_text(aes(x=healthexp+100,label=Name),size=4,hjust=0)
+#自动给一部分有标签的点添加标签
+cdat<-subset(countries,Year==2009 & healthexp>2000)
+cdat
+cdat$Name1<-cdat$Name
+cdat$Name1
+#%in% 运算符返回布尔值
+idx<-cdat$Name1 %in% c("Canada","Ireland","United Kingdom","United States","New Zealand","Iceland","Japan","Luxembourg","Netherlands","Switzerland")
+idx
+cdat$Name1[!idx]<-NA
+cdat
+ggplot(cdat,aes(x=healthexp,y=infmortality))+geom_point()+geom_text(aes(x=healthexp+100,label=Name1),size=4,hjust=0)+xlim(2000,10000)
+#绘制气泡图
+cdat<-subset(countries,Year==2009&Name %in% c("Canada","Ireland","United Kingdom","United States","New Zealand","Iceland","Japan","Luxembourg","Netherlands","Switzerland"))
+cdat
+#只将GDP映射给size，GDP会被映射成点的半径
+p<-ggplot(cdat,aes(x=healthexp,y=infmortality,size=GDP))+geom_point(shape=21,colour="black",fill="cornsilk")
+p
+#将GDP映射为面积
+p+scale_size_area(max_size = 15)
+#x轴与y轴皆为分类变量时，气泡图可以用来表示网格点的值
+HairEyeColor
+#对男性组与女性组求和
+hec<-HairEyeColor[,,"Male"]+HairEyeColor[,,"Female"]
+hec
+#将矩阵转换为长格式
+hec<-melt(hec,value.name = "count")
+hec
+ggplot(hec,aes(x=Eye,y=Hair))+geom_point(aes(size=count),shape=21,colour="black",fill="cornsilk")+
+  scale_size_area(max_size = 20,guide=FALSE)+geom_text(aes(y=as.numeric(Hair)-sqrt(count)/22,label=count),vjust=1,colour="grey60",size=4)
 
-
-
+ggplot(hec,aes(x=Eye,y=Hair))+geom_point(aes(size=count),shape=21,colour="black",fill="cornsilk")+
+  scale_size_area(max_size = 20,guide=FALSE)+geom_text(aes(label=count),vjust=1,colour="grey60",size=4)
+#绘制散点图矩阵
+c2009<-subset(countries,Year==2009,select = c(Name,GDP,laborrate,healthexp,infmortality))
+c2009
+pairs(c2009[,2:5])
+#自定义面板函数
+panel.cor<-function(x,y,digits=2,prefix="",cex.cor,...){
+  usr<-par("usr")
+  on.exit(par(usr))
+  par(usr=c(0,1,0,1))
+  r<-abs(cor(x,y,use = "complete.obs"))
+  txt<-format(c(r,0.123456789),digits = digits)[1]
+  txt<-paste(prefix,txt,sep="")
+  if(missing(cex.cor)) cex.cor<-0.8/strwidth(txt)
+  text(0.5,0.5,txt,cex=cex.cor*(1+r)/2)
+}
+#展示直方图函数
+panel.hist<-function(x,...){
+  usr<-par("usr")
+  on.exit(par(usr))
+  par(usr=c(usr[1:2],0,1.5))
+  h<-hist(x,plot = FALSE)
+  breaks<-h$breaks
+  nB<-length(breaks)
+  y<-h$counts
+  y<-y/max(y)
+  rect(breaks[-nB],0,breaks[-1],y,col = "white",...)
+}
+pairs(c2009[,2:5],upper.panel = panel.cor,diag.panel = panel.hist,lower.panel = panel.smooth)
 
 
 
