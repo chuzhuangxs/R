@@ -88,6 +88,29 @@ p+geom_dotplot(binwidth = 0.25)+geom_rug()+scale_y_continuous(breaks = NULL)+the
 #固定间距的分组
 p+geom_dotplot(binwidth = 0.25,method = "histodot")+geom_rug()+scale_y_continuous(breaks = NULL)+theme(axis.title.y = element_blank())
 #中心堆叠
+p+geom_dotplot(binwidth = 0.25,stackdir = "center")+scale_y_continuous(breaks = NULL)+theme(axis.title.y = element_blank())
+p+geom_dotplot(binwidth = 0.25,stackdir = "centerwhole")+scale_y_continuous(breaks = NULL)+theme(axis.title.y = element_blank())
+#基于分组数据绘制分组点图
+e<-ggplot(heightweight,aes(x=sex,y=heightIn))
+e+geom_dotplot(binaxis = "y",binwidth = 0.5,stackdir = "center")
+#将点图叠在箱线图上
+e+geom_boxplot(outlier.colour = NA,width=0.4)+geom_dotplot(binaxis = "y",binwidth = 0.5,stackdir = "center",fill=NA)
+#将点图放置于箱线图旁边,离散型变量绘制点图，箱线图必须指定分组
+e+geom_boxplot(aes(x=as.numeric(sex)+0.3,group=sex),width=.25)+
+  geom_dotplot(aes(x=as.numeric(sex)-0.3,group=sex),binaxis = "y",binwidth = .5,stackdir = "center")+
+  scale_x_continuous(breaks = 1:nlevels(heightweight$sex),labels = levels(heightweight$sex))
+#绘制二维数据的密度图
+p<-ggplot(faithful,aes(x=eruptions,y=waiting))
+p+geom_point()+stat_density2d()
+#将密度估计映射给填充色
+p+stat_density2d(aes(fill=..density..),geom="raster",contour = FALSE)
+#将密度映射给透明度 ,raster,tile代表栅格与瓦片
+p+geom_point()+stat_density2d(aes(alpha=..density..),geom="tile",contour = FALSE)
+#设置带宽
+p+stat_density2d(aes(fill=..density..),geom="raster",contour = FALSE,h=c(.5,5))
+
+
+
 
 
 
